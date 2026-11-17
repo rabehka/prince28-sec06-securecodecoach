@@ -1,145 +1,56 @@
-# \# SecureCodeCoach
+# SecureCodeCoach
 
-#
+**An AI-powered secure coding mentor that helps developers identify vulnerabilities and learn safer coding practices using OWASP guidance.**
 
-# SecureCodeCoach is an AI-powered secure coding mentor that helps developers understand common security vulnerabilities and write safer code using OWASP security guidance.
+## 1. Target Users
 
-#
+- Beginner software developers
+- Computer science students
+- Programmers learning secure coding
+- Developers who want to improve application security
 
-# \## Problem Statement
+## 2. Problem Statement
 
-#
+Developers may write code without identifying security vulnerabilities. This can lead to SQL Injection, Cross-Site Scripting (XSS), insecure authentication, and other security risks.
 
-# Developers sometimes write code without identifying security vulnerabilities. This can lead to risks such as SQL injection, cross-site scripting, and insecure authentication. SecureCodeCoach aims to help developers identify these issues and understand secure coding practices.
+SecureCodeCoach aims to help developers understand common vulnerabilities and follow secure coding practices through AI-powered explanations and OWASP-based guidance.
 
-#
+## 3. Data Sources
 
-# \## Project Goals
+The project uses:
 
-#
+- OWASP Top 10 security guidance
+- Sample security vulnerability records stored in `data/sample_records.json`
+- Security information and examples used for learning and testing
 
-# \- Help developers understand common security vulnerabilities.
+## 4. Project Goals
 
-# \- Provide OWASP-based security guidance.
+- Identify common security vulnerabilities.
+- Explain security risks in simple language.
+- Provide OWASP-based secure coding guidance.
+- Help developers improve their coding practices.
+- Build a reliable backend using FastAPI.
 
-# \- Encourage secure coding practices.
+## 5. Technology Stack
 
-# \- Build a reliable backend using FastAPI.
+- Python 3.12
+- FastAPI
+- Pydantic Settings
+- uv
+- Pytest
+- Ruff
+- JSON
 
-#
+## 6. Hardest Problem
 
-# \## Technology Stack
+One of the challenging parts is building a reliable backend that loads security records correctly and handles errors safely.
 
-#
+Implementing request ID tracking and structured JSON logging is also important for debugging and monitoring API requests.
 
-# \- Python 3.12
+## 7. Target Metrics
 
-# \- FastAPI
-
-# \- Pydantic Settings
-
-# \- uv
-
-# \- Pytest
-
-# \- Ruff
-
-#
-
-# \## Project Structure
-
-#
-
-# ```text
-
-# securecodecoach/
-
-# ├── src/
-
-# │   └── securecodecoach/
-
-# ├── tests/
-
-# ├── docs/
-
-# ├── data/
-
-# ├── pyproject.toml
-
-# ├── uv.lock
-
-# └── README.md
-
-# ```
-
-#
-
-# \## Getting Started
-
-#
-
-# \### Install dependencies
-
-#
-
-# ```bash
-
-# python -m uv sync
-
-# ```
-
-#
-
-# \### Run the application
-
-#
-
-# ```bash
-
-# python -m uv run uvicorn securecodecoach.api.main:app --reload
-
-# ```
-
-#
-
-# \### Run tests
-
-#
-
-# ```bash
-
-# python -m uv run pytest
-
-# ```
-
-#
-
-# \### API Documentation
-
-#
-
-# Once the application is running, visit:
-
-#
-
-# http://127.0.0.1:8000/docs
-
-#
-
-# \## Project Status
-
-#
-
-# Day 1 – Foundation setup completed.
-
-#
-
-# \- FastAPI backend created.
-
-# \- Health and readiness endpoints added.
-
-# \- JSON data loader implemented.
-
-# \- Automated tests added (6 passed).
-
-# \- Code quality checks configured.
+- At least 20 security records in the dataset.
+- All API endpoints should return the expected responses.
+- At least 6 automated API tests should pass.
+- Invalid requests should return proper HTTP error responses.
+- Every application log should include a
