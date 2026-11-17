@@ -49,4 +49,3 @@
 \- Ruff
 
 \- OWASP security guidance
-

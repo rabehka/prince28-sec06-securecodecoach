@@ -1,22 +1,22 @@
 # \# SecureCodeCoach
 
-# 
+#
 
 # SecureCodeCoach is an AI-powered secure coding mentor that helps developers understand common security vulnerabilities and write safer code using OWASP security guidance.
 
-# 
+#
 
 # \## Problem Statement
 
-# 
+#
 
 # Developers sometimes write code without identifying security vulnerabilities. This can lead to risks such as SQL injection, cross-site scripting, and insecure authentication. SecureCodeCoach aims to help developers identify these issues and understand secure coding practices.
 
-# 
+#
 
 # \## Project Goals
 
-# 
+#
 
 # \- Help developers understand common security vulnerabilities.
 
@@ -26,11 +26,11 @@
 
 # \- Build a reliable backend using FastAPI.
 
-# 
+#
 
 # \## Technology Stack
 
-# 
+#
 
 # \- Python 3.12
 
@@ -44,11 +44,11 @@
 
 # \- Ruff
 
-# 
+#
 
 # \## Project Structure
 
-# 
+#
 
 # ```text
 
@@ -72,15 +72,15 @@
 
 # ```
 
-# 
+#
 
 # \## Getting Started
 
-# 
+#
 
 # Install dependencies:
 
-# 
+#
 
 # ```bash
 
@@ -88,11 +88,11 @@
 
 # ```
 
-# 
+#
 
 # Run the application:
 
-# 
+#
 
 # ```bash
 
@@ -100,15 +100,14 @@
 
 # ```
 
-# 
+#
 
 # \*The application command will be updated when the FastAPI application is created.\*
 
-# 
+#
 
 # \## Project Status
 
-# 
+#
 
 # Day 1 – Foundation setup in progress.
-

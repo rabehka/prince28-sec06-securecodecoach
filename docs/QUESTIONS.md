@@ -21,4 +21,3 @@
 9\. How will we protect sensitive information such as API keys?
 
 10\. How can we test whether the application works correctly?
-
