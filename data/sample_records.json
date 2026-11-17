@@ -38,5 +38,125 @@
     "severity": "High",
     "description": "Sensitive information may be exposed due to insufficient data protection.",
     "recommendation": "Encrypt sensitive data in transit and at rest."
+  },
+  {
+    "id": 6,
+    "name": "Security Misconfiguration",
+    "category": "Configuration",
+    "severity": "High",
+    "description": "Incorrect security settings may expose application resources.",
+    "recommendation": "Disable unnecessary services and use secure default configurations."
+  },
+  {
+    "id": 7,
+    "name": "Insecure Direct Object Reference",
+    "category": "Authorization",
+    "severity": "High",
+    "description": "Attackers may access another user's data by changing object identifiers.",
+    "recommendation": "Verify user permissions before accessing requested objects."
+  },
+  {
+    "id": 8,
+    "name": "Cross-Site Request Forgery",
+    "category": "Request Forgery",
+    "severity": "High",
+    "description": "An attacker may trick an authenticated user into performing unwanted actions.",
+    "recommendation": "Use CSRF tokens and validate request origins."
+  },
+  {
+    "id": 9,
+    "name": "Weak Password Storage",
+    "category": "Authentication",
+    "severity": "Critical",
+    "description": "Passwords stored without secure hashing may be exposed.",
+    "recommendation": "Use Argon2 or bcrypt with appropriate password hashing settings."
+  },
+  {
+    "id": 10,
+    "name": "Insecure Deserialization",
+    "category": "Deserialization",
+    "severity": "High",
+    "description": "Untrusted serialized data may execute malicious operations.",
+    "recommendation": "Validate input and avoid deserializing untrusted data."
+  },
+  {
+    "id": 11,
+    "name": "Server-Side Request Forgery",
+    "category": "Request Forgery",
+    "severity": "High",
+    "description": "An attacker may cause a server to make requests to internal resources.",
+    "recommendation": "Validate destination URLs and restrict outbound network access."
+  },
+  {
+    "id": 12,
+    "name": "Path Traversal",
+    "category": "Input Validation",
+    "severity": "High",
+    "description": "An attacker may access files outside the intended directory.",
+    "recommendation": "Normalize file paths and restrict access to approved directories."
+  },
+  {
+    "id": 13,
+    "name": "Command Injection",
+    "category": "Injection",
+    "severity": "Critical",
+    "description": "Unsafe input may allow attackers to execute system commands.",
+    "recommendation": "Avoid shell execution with user input and validate all inputs."
+  },
+  {
+    "id": 14,
+    "name": "Missing Security Headers",
+    "category": "Configuration",
+    "severity": "Medium",
+    "description": "Missing HTTP security headers may increase exposure to browser-based attacks.",
+    "recommendation": "Configure appropriate security headers such as CSP and X-Content-Type-Options."
+  },
+  {
+    "id": 15,
+    "name": "Insecure File Upload",
+    "category": "File Security",
+    "severity": "High",
+    "description": "Unrestricted file uploads may allow malicious files into an application.",
+    "recommendation": "Validate file types, limit file sizes, and store uploads securely."
+  },
+  {
+    "id": 16,
+    "name": "Insufficient Logging",
+    "category": "Monitoring",
+    "severity": "Medium",
+    "description": "Missing security logs may make attacks difficult to detect.",
+    "recommendation": "Record security events and monitor suspicious activity."
+  },
+  {
+    "id": 17,
+    "name": "Hardcoded Secrets",
+    "category": "Secret Management",
+    "severity": "Critical",
+    "description": "API keys and passwords embedded in source code may be exposed.",
+    "recommendation": "Store secrets in environment variables or a secure secret manager."
+  },
+  {
+    "id": 18,
+    "name": "Weak Session Management",
+    "category": "Authentication",
+    "severity": "High",
+    "description": "Poor session handling may allow attackers to hijack user sessions.",
+    "recommendation": "Use secure session cookies and regenerate session identifiers after login."
+  },
+  {
+    "id": 19,
+    "name": "Cryptographic Failures",
+    "category": "Cryptography",
+    "severity": "High",
+    "description": "Weak or outdated encryption may expose sensitive information.",
+    "recommendation": "Use modern, well-maintained cryptographic algorithms."
+  },
+  {
+    "id": 20,
+    "name": "Unrestricted API Access",
+    "category": "API Security",
+    "severity": "High",
+    "description": "APIs without proper access controls may expose protected resources.",
+    "recommendation": "Implement authentication, authorization, and rate limiting."
   }
 ]
