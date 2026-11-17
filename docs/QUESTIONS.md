@@ -11,8 +11,7 @@
 4\. What are the common security vulnerabilities developers face?
 
 5\. What is the role of OWASP in this project?
-
-6\. How can the application identify insecure code?
+6. Which specific vulnerability was detected in the latest user-submitted source code?
 
 7\. How will the application provide secure coding recommendations?
 
