@@ -1,3 +1,4 @@
+
 # SecureCodeCoach
 
 **An AI-powered secure coding mentor that helps developers identify vulnerabilities and learn safer coding practices using OWASP guidance.**
@@ -53,4 +54,129 @@ Implementing request ID tracking and structured JSON logging is also important f
 - All API endpoints should return the expected responses.
 - At least 6 automated API tests should pass.
 - Invalid requests should return proper HTTP error responses.
-- Every application log should include a
+- Every application request log should include a unique `request_id`.
+- Normal API requests should complete within 2 seconds.
+
+## 8. Project Structure
+
+```text
+securecodecoach/
+│
+├── data/
+│   └── sample_records.json
+│
+├── docs/
+│   ├── QUESTIONS.md
+│   └── REQUIREMENTS.md
+│
+├── src/
+│   └── securecodecoach/
+│       ├── api/
+│       │   ├── routes/
+│       │   │   ├── documents.py
+│       │   │   └── health.py
+│       │   └── main.py
+│       ├── config.py
+│       ├── data_loader.py
+│       └── logging_setup.py
+│
+├── tests/
+│   ├── test_api.py
+│   ├── test_data_loader.py
+│   └── test_health.py
+│
+├── .env.example
+├── .gitignore
+├── .pre-commit-config.yaml
+├── pyproject.toml
+├── uv.lock
+└── README.md
+```
+
+## 9. Getting Started
+
+### Prerequisites
+
+- Python 3.12
+- uv package manager
+
+### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/rabehka/prince28-sec06-securecodecoach.git
+cd prince28-sec06-securecodecoach
+```
+
+### Step 2: Install dependencies
+
+```bash
+uv sync
+```
+
+### Step 3: Configure environment variables
+
+Copy `.env.example` to `.env` and configure the required values.
+
+Example:
+
+```env
+APP_NAME=securecodecoach
+APP_ENV=local
+LOG_LEVEL=INFO
+DATA_FILE=data/sample_records.json
+```
+
+Never commit your actual `.env` file or API keys.
+
+### Step 4: Run the application
+
+```bash
+uv run uvicorn securecodecoach.api.main:app --reload --no-access-log
+```
+
+### Step 5: Open API documentation
+
+Visit:
+
+http://127.0.0.1:8000/docs
+
+## 10. Available API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | Welcome message |
+| GET | `/health` | Health check |
+| GET | `/ready` | Readiness check |
+| GET | `/v1/documents` | Get all security records |
+| GET | `/v1/documents/{document_id}` | Get a record by ID |
+
+## 11. Testing
+
+Run automated tests:
+
+```bash
+uv run pytest
+```
+
+Run Ruff checks:
+
+```bash
+uv run ruff check .
+```
+
+## 12. Current Project Status
+
+- FastAPI backend implemented.
+- Environment-based configuration implemented.
+- Structured JSON logging implemented.
+- Request ID tracking implemented.
+- Problem Details error responses implemented.
+- Health and readiness endpoints implemented.
+- Security document endpoints implemented.
+- 20 sample security vulnerability records added.
+- Automated tests passing.
+
+---
+
+**Project:** SecureCodeCoach
+**Repository:** https://github.com/rabehka/prince28-sec06-securecodecoach
