@@ -78,7 +78,7 @@
 
 #
 
-# Install dependencies:
+# \### Install dependencies
 
 #
 
@@ -90,7 +90,7 @@
 
 #
 
-# Run the application:
+# \### Run the application
 
 #
 
@@ -102,7 +102,27 @@
 
 #
 
-# \*The application command will be updated when the FastAPI application is created.\*
+# \### Run tests
+
+#
+
+# ```bash
+
+# python -m uv run pytest
+
+# ```
+
+#
+
+# \### API Documentation
+
+#
+
+# Once the application is running, visit:
+
+#
+
+# http://127.0.0.1:8000/docs
 
 #
 
@@ -110,4 +130,16 @@
 
 #
 
-# Day 1 – Foundation setup in progress.
+# Day 1 – Foundation setup completed.
+
+#
+
+# \- FastAPI backend created.
+
+# \- Health and readiness endpoints added.
+
+# \- JSON data loader implemented.
+
+# \- Automated tests added (6 passed).
+
+# \- Code quality checks configured.
