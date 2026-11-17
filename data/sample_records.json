@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "name": "SQL Injection",
+    "category": "Injection",
+    "severity": "Critical",
+    "description": "An attacker may manipulate database queries through unsafe user input.",
+    "recommendation": "Use parameterized queries instead of directly concatenating user input."
+  },
+  {
+    "id": 2,
+    "name": "Cross-Site Scripting",
+    "category": "Injection",
+    "severity": "High",
+    "description": "An attacker may inject malicious scripts into web pages.",
+    "recommendation": "Validate input and encode output before displaying user content."
+  },
+  {
+    "id": 3,
+    "name": "Insecure Authentication",
+    "category": "Authentication",
+    "severity": "High",
+    "description": "Weak authentication mechanisms may allow unauthorized access.",
+    "recommendation": "Use strong password policies and secure authentication methods."
+  },
+  {
+    "id": 4,
+    "name": "Broken Access Control",
+    "category": "Authorization",
+    "severity": "Critical",
+    "description": "Users may access resources or perform actions beyond their permissions.",
+    "recommendation": "Enforce server-side authorization checks for every protected resource."
+  },
+  {
+    "id": 5,
+    "name": "Sensitive Data Exposure",
+    "category": "Data Protection",
+    "severity": "High",
+    "description": "Sensitive information may be exposed due to insufficient data protection.",
+    "recommendation": "Encrypt sensitive data in transit and at rest."
+  }
+]
