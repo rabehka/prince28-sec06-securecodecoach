@@ -1,0 +1,136 @@
+from datetime import date, datetime
+from typing import Any
+
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    ForeignKey,
+    Index,
+    Integer,
+    MetaData,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+)
+
+# Naming convention for database constraints and indexes
+NAMING_CONVENTION = {
+    "ix": "ix_%(column_0_label)s",
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s",
+}
+
+
+# Base class for all database models
+class Base(DeclarativeBase):
+    metadata = MetaData(naming_convention=NAMING_CONVENTION)
+
+
+# Documents table
+class Document(Base):
+    __tablename__ = "documents"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    external_id: Mapped[str] = mapped_column(
+        String,
+        unique=True,
+    )
+
+    title: Mapped[str] = mapped_column(Text)
+
+    source_url: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    licence: Mapped[str | None] = mapped_column(
+        String(200),
+        nullable=True,
+    )
+
+    doc_type: Mapped[str] = mapped_column(
+        String(50),
+        server_default="record",
+    )
+
+    published_on: Mapped[date | None] = mapped_column(
+        Date,
+        nullable=True,
+    )
+
+    sha256: Mapped[str] = mapped_column(
+        String(64),
+        index=True,
+    )
+
+    metadata_: Mapped[dict[str, Any]] = mapped_column(
+        "metadata",
+        JSONB,
+        default=dict,
+        server_default="{}",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(),
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+
+    pages: Mapped[list["Page"]] = relationship(
+        back_populates="document",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+    __table_args__ = (Index("ix_documents_doc_type", "doc_type"),)
+
+
+# Pages table
+class Page(Base):
+    __tablename__ = "pages"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey(
+            "documents.id",
+            ondelete="CASCADE",
+        ),
+        index=True,
+    )
+
+    page_no: Mapped[int] = mapped_column(Integer)
+
+    text: Mapped[str] = mapped_column(Text)
+
+    document: Mapped["Document"] = relationship(
+        back_populates="pages",
+    )
+
+    __table_args__ = (
+        UniqueConstraint("document_id", "page_no"),
+        CheckConstraint(
+            "page_no >= 1",
+            name="page_no_positive",
+        ),
+    )
