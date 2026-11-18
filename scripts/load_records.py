@@ -32,6 +32,7 @@ async def load_records() -> None:
         for record in records:
             external_id = str(record["id"])
             content_hash = calculate_sha256(record)
+            source_url = record.get("source_url")
 
             result = await session.execute(
                 select(Document).where(Document.external_id == external_id)
@@ -48,6 +49,7 @@ async def load_records() -> None:
                     external_id=external_id,
                     title=record["name"],
                     doc_type=record["category"],
+                    source_url=source_url,
                     sha256=content_hash,
                     metadata_=metadata,
                 )
@@ -65,12 +67,13 @@ async def load_records() -> None:
 
                 inserted += 1
 
-            elif document.sha256 == content_hash:
+            elif document.sha256 == content_hash and document.source_url == source_url:
                 unchanged += 1
 
             else:
                 document.title = record["name"]
                 document.doc_type = record["category"]
+                document.source_url = source_url
                 document.sha256 = content_hash
                 document.metadata_ = metadata
 
