@@ -1,0 +1,48 @@
+# Engineering notes: SecureCodeCoach
+
+## D03 · PostgreSQL
+
+### Migrations (upgrade, downgrade, upgrade)
+
+```text
+INFO  [alembic.runtime.migration] Running downgrade c23c65eaec90 -> 37f196e109b0, add GIN index to document metadata
+37f196e109b0
+INFO  [alembic.runtime.migration] Running upgrade 37f196e109b0 -> c23c65eaec90, add GIN index to document metadata
+37f196e109b0 -> c23c65eaec90 (head), add GIN index to document metadata
+<base> -> 37f196e109b0, create documents and pages
+```
+
+### The loader is idempotent
+
+```text
+run 1: Inserted: 20  Unchanged: 0  Updated: 0
+run 2: Inserted: 0  Unchanged: 20  Updated: 0
+run 3 (after editing one record): Inserted: 0  Unchanged: 19  Updated: 1
+```
+
+### EXPLAIN for ?severity=High
+
+```text
+-- 1) What the planner chooses on its own:
+Seq Scan on documents  (cost=0.00..1.25 rows=1 width=36) (actual time=0.013..0.019 rows=13.00 loops=1)
+  Filter: (metadata @> '{"severity": "High"}'::jsonb)
+  Rows Removed by Filter: 7
+  Buffers: shared hit=1
+Planning Time: 3.887 ms
+Execution Time: 0.046 ms
+
+-- 2) Seq scan switched off, to prove the index can be used:
+Bitmap Heap Scan on documents  (cost=12.93..16.94 rows=1 width=36) (actual time=0.067..0.072 rows=13.00 loops=1)
+  Recheck Cond: (metadata @> '{"severity": "High"}'::jsonb)
+  Heap Blocks: exact=1
+  ->  Bitmap Index Scan on ix_documents_metadata_gin  (cost=0.00..12.93 rows=1 width=0) (actual time=0.047..0.047 rows=13.00 loops=1)
+        Index Cond: (metadata @> '{"severity": "High"}'::jsonb)
+Planning Time: 0.079 ms
+Execution Time: 0.168 ms
+```
+
+Why did the planner choose a Seq Scan on my table?
+The table has only 20 rows, all in one 8 KB page. Reading that one page (cost 1.25) is cheaper than using the index (cost 16.94), and 13 of the 20 rows match anyway.
+
+When would it switch to the GIN index?
+When the table grows to thousands of rows and the filter matches only a small fraction of them.
