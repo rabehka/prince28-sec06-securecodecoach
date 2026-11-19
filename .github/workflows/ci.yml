@@ -38,6 +38,7 @@ jobs:
           uv run ruff format --check .
       - name: Run unit and integration tests with coverage
         env:
+          APP_ENV: test
           TEST_DB_USER: postgres
           TEST_DB_PASSWORD: postgres  # pragma: allowlist secret
           TEST_DB_HOST: 127.0.0.1
