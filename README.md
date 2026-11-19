@@ -180,3 +180,33 @@ uv run ruff check .
 
 **Project:** SecureCodeCoach
 **Repository:** https://github.com/rabehka/prince28-sec06-securecodecoach
+
+## 13. Running with Docker & Docker Compose
+
+Start PostgreSQL, Redis, and the FastAPI service (which runs Alembic migrations and loads initial records automatically):
+
+```bash
+docker compose up -d --build
+```
+
+Check container health:
+
+```bash
+docker compose ps
+curl [http://127.0.0.1:8000/ready](http://127.0.0.1:8000/ready)
+```
+
+## 14. Unit vs. Integration Tests & Coverage
+
+- **Unit tests** (fast, zero database dependency):
+  ```bash
+  uv run pytest tests/unit
+  ```
+- **Integration tests** (runs against an isolated `securecodecoach_test` database and drops it afterward):
+  ```bash
+  uv run pytest tests/integration
+  ```
+- **Full suite with coverage report:**
+  ```bash
+  uv run pytest -v --cov=securecodecoach --cov-report=term-missing
+  ```

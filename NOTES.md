@@ -46,3 +46,22 @@ The table has only 20 rows, all in one 8 KB page. Reading that one page (cost 1.
 
 When would it switch to the GIN index?
 When the table grows to thousands of rows and the filter matches only a small fraction of them.
+
+## D04 · Docker, Compose & Testing
+
+### Container Build & Security
+
+- Multi-stage `Dockerfile` (`ghcr.io/astral-sh/uv:python3.12-bookworm-slim` builder -> `python:3.12-slim-bookworm` runtime).
+- Final image size: **308 MB** (under 400 MB target).
+- Runs as non-root user `appuser` (`uid=1001`) with a built-in `/health` `HEALTHCHECK`.
+
+### Docker Compose Stack
+
+- Services: `db` (`postgres:16-alpine`), `redis` (`redis:7-alpine`), and `api` (`service_healthy` dependency gating).
+- On startup, `api` runs `alembic upgrade head` and `python scripts/load_db.py` before serving Uvicorn.
+
+### Test Suite Split & Coverage
+
+- `tests/unit/` — 19 fast unit tests using in-memory repository fakes.
+- `tests/integration/` — 3 PostgreSQL integration tests running against an isolated `securecodecoach_test` database created and dropped automatically per test.
+- Total: **22 passed in 3.55s**, **95% statement coverage** across `src/securecodecoach`.

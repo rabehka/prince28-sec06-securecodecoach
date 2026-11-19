@@ -25,6 +25,8 @@ dev = [
     "httpx>=0.28.1",
     "pre-commit>=4.7.0",
     "pytest>=9.2.0",
+    "pytest-asyncio>=1.5.0",
+    "pytest-cov>=7.1.0",
     "ruff>=0.17.5",
 ]
 
@@ -39,5 +41,10 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-q"
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient`"]
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "integration: tests that run against an isolated PostgreSQL database",
+]

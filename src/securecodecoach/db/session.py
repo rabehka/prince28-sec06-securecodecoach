@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from securecodecoach.config import get_settings
-from securecodecoach.db.url import to_async_database_url
+from securecodecoach.db.url import get_connect_args, to_async_database_url
 
 settings = get_settings()
 
@@ -14,7 +14,7 @@ engine = create_async_engine(
     DATABASE_URL,
     echo=False,
     pool_pre_ping=True,
-    connect_args={"ssl": "require"},
+    connect_args=get_connect_args(settings.database_url),
 )
 
 AsyncSessionLocal = async_sessionmaker(

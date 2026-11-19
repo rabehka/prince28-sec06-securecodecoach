@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from securecodecoach.config import get_settings
 from securecodecoach.db.models import Base
-from securecodecoach.db.url import to_async_database_url
+from securecodecoach.db.url import get_connect_args, to_async_database_url
 
 config = context.config
 
@@ -58,7 +58,7 @@ async def run_async_migrations() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
-        connect_args={"ssl": "require"},
+        connect_args=get_connect_args(settings.database_url),
     )
 
     async with connectable.connect() as connection:
