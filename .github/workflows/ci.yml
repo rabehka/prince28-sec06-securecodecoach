@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres  # pragma: allowlist secret
+          POSTGRES_DB: securecodecoach
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Set up Python
+        run: uv python install 3.12
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Lint and format check
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Run unit and integration tests with coverage
+        env:
+          TEST_DB_USER: postgres
+          TEST_DB_PASSWORD: postgres  # pragma: allowlist secret
+          TEST_DB_HOST: 127.0.0.1
+          TEST_DB_PORT: "5432"
+        run: |
+          export DATABASE_URL="postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@${TEST_DB_HOST}:${TEST_DB_PORT}/securecodecoach?ssl=disable"
+          uv run pytest -v --cov=securecodecoach --cov-report=term-missing
