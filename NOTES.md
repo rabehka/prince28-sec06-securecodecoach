@@ -65,3 +65,17 @@ When the table grows to thousands of rows and the filter matches only a small fr
 - `tests/unit/` — 19 fast unit tests using in-memory repository fakes.
 - `tests/integration/` — 3 PostgreSQL integration tests running against an isolated `securecodecoach_test` database created and dropped automatically per test.
 - Total: **22 passed in 3.55s**, **95% statement coverage** across `src/securecodecoach`.
+
+### Real Evidence Outputs
+```text
+IMAGE                 ID             DISK USAGE   CONTENT SIZE   EXTRA
+securecodecoach:dev   ab4bccafc7ef        308MB           72MB   U
+uid=1001(appuser) gid=1001(appgroup) groups=1001(appgroup)
+NAME                        IMAGE                 COMMAND                  SERVICE   CREATED          STATUS                      PORTS
+securecodecoach-api-1       securecodecoach:dev   "uvicorn 'securecodeâ€¦"   api       24 minutes ago   Exited (3) 23 minutes ago
+securecodecoach-db-1        postgres:16-alpine    "docker-entrypoint.sâ€¦"   db        24 minutes ago   Up 24 minutes (healthy)     0.0.0.0:5433->5432/tcp, [::]:5433->5432/tcp
+securecodecoach-migrate-1   securecodecoach:dev   "sh -c 'alembic upgrâ€¦"   migrate   24 minutes ago   Exited (0) 23 minutes ago
+securecodecoach-redis-1     redis:7-alpine        "docker-entrypoint.sâ€¦"   redis     24 minutes ago   Up 24 minutes (healthy)     0.0.0.0:6379->6379/tcp, [::]:6379->6379/tcp
+migrate-1  | Updated: 0
+19 passed, 7 skipped in 2.53s
+```
