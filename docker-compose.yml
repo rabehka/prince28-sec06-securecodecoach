@@ -1,58 +1,63 @@
+# One command for the whole stack:  docker compose up --build
+name: securecodecoach
+
 services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-securecodecoach}
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app  # pragma: allowlist secret
+      POSTGRES_DB: app
     ports:
-      - "127.0.0.1:5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-securecodecoach}"]
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
       interval: 5s
-      timeout: 5s
+      timeout: 3s
       retries: 10
-      start_period: 5s
 
   redis:
     image: redis:7-alpine
+    ports:
+      - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
-      start_period: 3s
+
+  migrate:
+    image: securecodecoach:dev
+    build: .
+    command: ["sh", "-c", "alembic upgrade head && python scripts/load_db.py"]
+    environment: &app-env
+      APP_ENV: local
+      DATABASE_URL: postgresql://app:app@db:5432/app  # pragma: allowlist secret
+    depends_on:
+      db:
+        condition: service_healthy
 
   api:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: securecodecoach:dev
+    build: .
+    environment: *app-env
     ports:
       - "8000:8000"
-    environment:
-      APP_NAME: ${APP_NAME:-securecodecoach}
-      APP_ENV: ${APP_ENV:-local}
-      LOG_LEVEL: ${LOG_LEVEL:-INFO}
-      DATA_FILE: data/sample_records.json
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-securecodecoach}?ssl=disable
-      REDIS_URL: redis://redis:6379/0
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: >
-      sh -c "alembic upgrade head &&
-             python scripts/load_db.py &&
-             exec uvicorn securecodecoach.api.main:create_app --factory --host 0.0.0.0 --port 8000 --no-access-log"
+      migrate:
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s
-      timeout: 5s
+      timeout: 3s
       retries: 5
-      start_period: 15s
 
 volumes:
   pgdata:

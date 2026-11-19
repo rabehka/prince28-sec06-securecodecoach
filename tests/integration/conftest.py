@@ -1,90 +1,58 @@
+# ruff: noqa: E501
+import asyncio
 import os
+import uuid
 
-import asyncpg
-import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-from sqlalchemy.engine import URL
+import pytest
+from alembic import command
+from alembic.config import Config
+from sqlalchemy import text
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.pool import NullPool
 
-import securecodecoach.api.deps as deps
-from securecodecoach.api.deps import get_session
-from securecodecoach.api.main import create_app
 from securecodecoach.config import get_settings
-from securecodecoach.db.models import Base
-from securecodecoach.db.url import get_connect_args
+from securecodecoach.db import session as db_session
+from securecodecoach.db.url import to_async_database_url
 
-TEST_DB = os.getenv("TEST_DB_NAME", "securecodecoach_test")
-_DB_CFG = dict(
-    user=os.getenv("TEST_DB_USER", "postgres"),
-    password=os.getenv("TEST_DB_PASSWORD", "postgres"),
-    host=os.getenv("TEST_DB_HOST", "127.0.0.1"),
-    port=int(os.getenv("TEST_DB_PORT", "5432")),
-)
-TEST_URL = URL.create(
-    "postgresql+asyncpg",
-    username=_DB_CFG["user"],
-    password=_DB_CFG["password"],
-    host=_DB_CFG["host"],
-    port=_DB_CFG["port"],
-    database=TEST_DB,
-)
+BASE_URL = os.getenv("TEST_DATABASE_URL")
 
 
-async def _recreate_db(drop_only=False):
-    conn = await asyncpg.connect(database="postgres", **_DB_CFG)
-    try:
-        await conn.execute(
-            "SELECT pg_terminate_backend(pid) FROM pg_stat_activity "
-            "WHERE datname = $1 AND pid != pg_backend_pid()",
-            TEST_DB,
-        )
-        await conn.execute(f'DROP DATABASE IF EXISTS "{TEST_DB}"')
-        if not drop_only:
-            await conn.execute(f'CREATE DATABASE "{TEST_DB}"')
-    finally:
-        await conn.close()
+def pytest_collection_modifyitems(config, items):
+    if BASE_URL:
+        return
+    skip = pytest.mark.skip(reason="set TEST_DATABASE_URL to run integration tests")
+    for item in items:
+        if "integration" in item.nodeid:
+            item.add_marker(skip)
 
 
-@pytest_asyncio.fixture
-async def test_engine():
-    await _recreate_db(False)
-    eng = create_async_engine(
-        TEST_URL, poolclass=NullPool, connect_args=get_connect_args(str(TEST_URL))
+async def _admin(sql: str) -> None:
+    engine = create_async_engine(to_async_database_url(BASE_URL), isolation_level="AUTOCOMMIT")
+    async with engine.connect() as conn:
+        await conn.execute(text(sql))
+    await engine.dispose()
+
+
+@pytest.fixture(scope="session")
+def database_url():
+    name = f"test_{uuid.uuid4().hex[:8]}"
+    asyncio.run(_admin(f'CREATE DATABASE "{name}"'))
+    url = make_url(to_async_database_url(BASE_URL)).set(database=name)
+    url_str = url.render_as_string(hide_password=False)
+    patch = pytest.MonkeyPatch()
+    patch.setenv("APP_ENV", "ci")
+    patch.setenv("DATABASE_URL", url_str)
+    get_settings.cache_clear()
+    test_engine = create_async_engine(url_str, pool_pre_ping=True)
+    patch.setattr(db_session, "engine", test_engine)
+    patch.setattr(
+        db_session,
+        "AsyncSessionLocal",
+        async_sessionmaker(bind=test_engine, expire_on_commit=False),
     )
-    async with eng.begin() as c:
-        await c.run_sync(Base.metadata.create_all)
-    try:
-        yield eng
-    finally:
-        await eng.dispose()
-        await _recreate_db(True)
-
-
-@pytest_asyncio.fixture
-async def db_session(test_engine):
-    sf = async_sessionmaker(bind=test_engine, expire_on_commit=False)
-    async with sf() as s:
-        yield s
-        await s.rollback()
-
-
-@pytest_asyncio.fixture
-async def integration_client(test_engine, monkeypatch):
-    monkeypatch.setenv("DATABASE_URL", TEST_URL.render_as_string(hide_password=False))
+    command.upgrade(Config("alembic.ini"), "head")
+    yield url_str
+    asyncio.run(test_engine.dispose())
     get_settings.cache_clear()
-    monkeypatch.setattr(deps, "engine", test_engine)
-    sf = async_sessionmaker(bind=test_engine, expire_on_commit=False)
-
-    async def _get_session():
-        async with sf() as s:
-            yield s
-
-    app = create_app()
-    app.dependency_overrides[get_session] = _get_session
-    async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://testserver"
-    ) as client:
-        yield client
-    app.dependency_overrides.clear()
-    get_settings.cache_clear()
+    patch.undo()
+    asyncio.run(_admin(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
