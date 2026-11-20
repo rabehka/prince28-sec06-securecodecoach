@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Render deploy hook
-        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        run: curl -fsS "${{ secrets.RENDER_DEPLOY_HOOK }}"
 
       - name: Wait for live /health to reflect new commit
         env:
