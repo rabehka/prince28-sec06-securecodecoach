@@ -1,7 +1,23 @@
 def test_health(client):
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "healthy"}
+    body = r.json()
+    assert body["status"] == "ok"
+    assert body["app"] == "securecodecoach"
+    assert "version" in body
+
+
+def test_health_reports_configured_version(client, monkeypatch):
+    monkeypatch.setenv("GIT_SHA", "abc1234")
+    from securecodecoach.config import get_settings
+
+    get_settings.cache_clear()
+    try:
+        r = client.get("/health")
+        assert r.status_code == 200
+        assert r.json()["version"] == "abc1234"
+    finally:
+        get_settings.cache_clear()
 
 
 def test_ready_up(client):

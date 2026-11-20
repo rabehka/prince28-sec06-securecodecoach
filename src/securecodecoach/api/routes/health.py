@@ -4,13 +4,20 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
 from securecodecoach.api.deps import check_db
+from securecodecoach.config import get_settings
 
 router = APIRouter()
 
 
 @router.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    settings = get_settings()
+    return {
+        "status": "ok",
+        "app": settings.app_name,
+        "env": settings.app_env,
+        "version": settings.git_sha,
+    }
 
 
 @router.get("/ready")
