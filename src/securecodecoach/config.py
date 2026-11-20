@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     data_file: Path = Path("data/sample_records.json")
 
     database_url: str
+    # The commit this image was built from. CI sets it (Dockerfile ARG GIT_SHA); locally "dev".
+    git_sha: str = "dev"
 
 
 @lru_cache

@@ -1,4 +1,3 @@
-
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -35,6 +34,9 @@ COPY --chown=appuser:appgroup data ./data
 COPY --chown=appuser:appgroup scripts ./scripts
 
 USER appuser
+
+ARG GIT_SHA=dev
+ENV GIT_SHA=${GIT_SHA}
 
 EXPOSE 8000
 
