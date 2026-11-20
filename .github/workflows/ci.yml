@@ -83,3 +83,30 @@ jobs:
             ${{ env.IMAGE }}:main
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: deploy to render
+    needs: image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+      - name: Wait for live /health to reflect new commit
+        env:
+          RENDER_URL: ${{ secrets.RENDER_URL }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          for i in $(seq 1 30); do
+            RESP=$(curl -fsS "${RENDER_URL%/}/health" || true)
+            SHA=$(echo "$RESP" | python3 -c "import sys,json; d=json.loads(sys.stdin.read() or '{}'); print(d.get('git_sha') or d.get('version') or '')" 2>/dev/null || true)
+            echo "Attempt $i: live sha=$SHA (expected $EXPECTED_SHA)"
+            if [ "$SHA" = "$EXPECTED_SHA" ]; then
+              echo "Deploy verified!"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Timed out waiting for version $EXPECTED_SHA"
+          exit 1
