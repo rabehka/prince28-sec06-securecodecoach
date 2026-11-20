@@ -9,7 +9,7 @@ from securecodecoach.config import get_settings
 router = APIRouter()
 
 
-@router.get("/health")
+@router.api_route("/health", methods=["GET", "HEAD"])
 async def health_check():
     settings = get_settings()
     return {
