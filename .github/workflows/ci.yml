@@ -1,48 +1,70 @@
 name: CI
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
+    name: lint and test
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16-alpine
+        image: pgvector/pgvector:pg17
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres  # pragma: allowlist secret
-          POSTGRES_DB: securecodecoach
-        ports:
-          - "5432:5432"
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app  # pragma: allowlist secret
+          POSTGRES_DB: app
+        ports: ["5433:5432"]
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "pg_isready -U app -d app"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://app:app@localhost:5433/app  # pragma: allowlist secret
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v4
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
+          version: "0.11.32"
           enable-cache: true
-      - name: Set up Python
-        run: uv python install 3.12
-      - name: Install dependencies
-        run: uv sync --frozen
-      - name: Lint and format check
-        run: |
-          uv run ruff check .
-          uv run ruff format --check .
-      - name: Run unit and integration tests with coverage
-        env:
-          APP_ENV: ci
-          TEST_DB_USER: postgres
-          TEST_DB_PASSWORD: postgres  # pragma: allowlist secret
-          TEST_DB_HOST: 127.0.0.1
-          TEST_DB_PORT: "5432"
-        run: |
-          export DATABASE_URL="postgresql://${TEST_DB_USER}:${TEST_DB_PASSWORD}@${TEST_DB_HOST}:${TEST_DB_PORT}/securecodecoach?ssl=disable"
-          uv run pytest -v --cov=securecodecoach --cov-report=term-missing
+      - run: uv sync --locked
+      - run: uv run poe lint
+      - name: Unit + integration tests with coverage
+        run: uv run poe cov
+
+  image:
+    name: build image
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: Image name (registry names must be lowercase)
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        if: github.event_name == 'push'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.event_name == 'push' }}
+          build-args: GIT_SHA=${{ github.sha }}
+          tags: |
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+            ${{ env.IMAGE }}:main
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
