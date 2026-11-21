@@ -100,6 +100,7 @@ jobs:
         run: uv sync --frozen
       - name: Run database migrations
         env:
+          APP_ENV: production
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: uv run alembic upgrade head
       - name: Trigger Render deploy hook
