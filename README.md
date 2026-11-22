@@ -97,3 +97,6 @@ securecodecoach/
 ├── pyproject.toml
 ├── uv.lock
 └── README.md
+## Run locally in one command
+
+docker compose up --build
