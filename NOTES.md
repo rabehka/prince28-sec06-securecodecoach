@@ -47,3 +47,9 @@ INFO  [alembic.runtime.migration] Running upgrade 37f196e109b0 -> c23c65eaec90, 
 ### One thing that went wrong today, and how I fixed it
 
 - Running Door 2 (`scripts/fetch.py repo`) with `--source owasp-cheatsheets` failed because `data\raw\owasp-cheatsheets` already contained the 10 files from Door 1. I fixed it by passing `--source owasp-cheatsheets-repo` so `git clone` wrote into a clean target directory.
+
+### Crawl in numbers (stretch)
+
+- Files and megabytes per source: `owasp-cheatsheets` = 10 files (0.34 MB); `owasp-cheatsheets-repo` = 139 files (2.67 MB); Total = 149 files (3.01 MB).
+- Slowest site: `raw.githubusercontent.com` (HTTP Door 1 took ~7.0s for 10 files due to 0.5s polite per-host crawl delay, compared to ~1.5s for the Git repo clone of 139 files).
+- Retries needed: 0 files required more than one attempt (`RETRIES: 0`, 0 failed, 0 blocked).
