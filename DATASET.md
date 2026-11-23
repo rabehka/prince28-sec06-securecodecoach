@@ -192,3 +192,5 @@ The complete list, with a sha256 fingerprint of every file, is `data/manifest.js
 
 - Start target (~100 OWASP Cheat Sheets) is completely collected (139 unique cheat sheets + 10 initial URL list copies = 149 files).
 - OWASP ASVS 4.0.3, ASVS 5.0, and the Web Security Testing Guide (WSTG) are intentionally deferred to the full-corpus phase (600+ files target).
+
+- Duplicate check (`sha256` across `data/manifest.jsonl`): 0 exact byte-identical duplicates (though the 10 initial URLs from `owasp-cheatsheets` share cheat sheet topics with `owasp-cheatsheets-repo`, their `sha256` hashes differ due to CRLF/LF line-ending differences between raw HTTP fetch and Git checkout).
