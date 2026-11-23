@@ -1,0 +1,18 @@
+# Sources for SecureCodeCoach. One row per file to download. Lines starting with # are notes.
+# Start target: Cheat sheets (about 100 files)
+# Where to look:
+#   https://github.com/OWASP/CheatSheetSeries
+#   https://github.com/OWASP/ASVS
+#   https://github.com/OWASP/wstg
+# Terms on my project card: CC BY-SA 4.0: attribution, share-alike for derived text.
+url,source,licence,title
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Authentication_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Authentication Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Session_Management_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Session Management Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Password_Storage_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Password Storage Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",SQL Injection Prevention Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Cross Site Scripting Prevention Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",CSRF Prevention Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Authorization_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Authorization Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Input_Validation_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Input Validation Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/REST_Security_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",REST Security Cheat Sheet
+https://raw.githubusercontent.com/OWASP/CheatSheetSeries/master/cheatsheets/Secrets_Management_Cheat_Sheet.md,owasp-cheatsheets,"CC BY-SA 4.0: attribution, share-alike for derived text.",Secrets Management Cheat Sheet
