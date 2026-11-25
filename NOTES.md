@@ -31,7 +31,7 @@
 
 - Primary: gemini-3.8-flash (Gemini) · fallback: openai/gpt-oss-20b (Groq)
 - First question on my laptop: first words after 2.33 s (fallback to Groq due to Gemini free-tier rate limit/errors), total 2.75 s, tokens in 273 / out 275, cost Rs 0.009783
-- Same question on my live URL (second, awake request): first words after ___ s. Day 1 target: under 1.5 s
+- Same question on my live URL (second, awake request): first words after 4.77 s (via Groq fallback; cold start was 31.16 s). Day 1 target: under 1.5 s
 
 ### Tokens: English against Tamil
 
