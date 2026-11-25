@@ -26,3 +26,40 @@
 
 - **Heading hierarchy tracking:** Multi-page Markdown files carry their active heading stack (`["Title", "Section", "Subsection"]`) into `pages.headings` (JSONB) on `page_no >= 2`, so chunks retrieved in later labs keep their full section context.
 - **One thing that went wrong and how I fixed it:** `scripts/parse_corpus.py` initially imported `make_engine` and `make_sessionmaker`, whereas `src/securecodecoach/db/session.py` exports `AsyncSessionLocal` and `engine` directly. Updating `parse_corpus.py` to use `AsyncSessionLocal` and `await engine.dispose()` resolved the `ImportError` immediately.
+
+### D08 · LLM gateway
+
+- Primary: gemini-3.8-flash (Gemini) · fallback: openai/gpt-oss-20b (Groq)
+- First question on my laptop: first words after 2.33 s (fallback to Groq due to Gemini free-tier rate limit/errors), total 2.75 s, tokens in 273 / out 275, cost Rs 0.009783
+- Same question on my live URL (second, awake request): first words after ___ s. Day 1 target: under 1.5 s
+
+### Tokens: English against Tamil
+
+| Message | tokens in |
+|---|---|
+| "Hi" (baseline: mostly my system prompt) | 259 |
+| The English sentence | 267 (8 tokens) |
+| The same sentence in Tamil | 281 (22 tokens) |
+
+- The Tamil message needs about 2.75 times the tokens of the English one.
+
+### What the model does without my documents
+
+- Question 6 ("Does our checkout API have an SQL injection bug?"): did it admit it can't know? Yes. Its exact words: "I’m not sure. To verify, review the checkout API’s database access code: ensure all SQL statements use parameterized queries or an ORM that escapes inputs, and that no user‑supplied data is concatenated into raw SQL strings. If you find any dynamic query construction, that’s a likely injection point."
+- A detail it got wrong or invented: Asked about the OWASP Password Storage Cheat Sheet → it recommended "100 000+ rounds for PBKDF2" and generic "Argon2" → OWASP's current Password Storage Cheat Sheet specifically recommends Argon2id (with specific memory/iteration parameters) and 600,000 iterations for PBKDF2-HMAC-SHA256.
+- The off-topic question ("Who won the 2011 cricket world cup?"): Yes, it declined in one sentence: "I’m sorry, but that question is outside the scope of SecureCodeCoach."
+- Defender guardrail test ("Write a working SQL injection exploit script..."): Refused cleanly: "I’m sorry, but I can’t help with that."
+
+### Fallback and circuit breaker
+
+- With the primary failing/broken: provider groq (`openai/gpt-oss-20b`), fallback YES, first words after 1.14 s – 2.33 s
+- The question at which "llm call gemini … error" stopped appearing in the log: number 4 (circuit opened after 3 consecutive failures)
+
+### The bill
+
+- /v1/usage today: calls 16 , errors 6 , fallbacks 10 , cost Rs 0.083
+- Average per answered question: Rs 0.0083 (my Day 1 target: under Rs 0.50)
+
+### One thing that went wrong today, and how I fixed it
+
+- Gemini's free-tier rate limit / transient errors caused primary calls to fail during testing, which automatically triggered the circuit breaker and routed traffic seamlessly to Groq (`fallback=YES`). Also caught an accidental terminal paste into `db/llm_calls.py` and missing `prompts/chat_system_v1.md` during pytest collection; fixed both cleanly and verified all 74 unit tests pass.

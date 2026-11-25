@@ -9,10 +9,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from securecodecoach.api.routes.chat import PROMPT_VERSION, load_prompt
+from securecodecoach.api.routes.chat import router as chat_router
 from securecodecoach.api.routes.documents import router as documents_router
 from securecodecoach.api.routes.health import router as health_router
 from securecodecoach.config import Settings, get_settings
-from securecodecoach.db.session import engine
+from securecodecoach.db.llm_calls import LlmCallRepository
+from securecodecoach.db.session import AsyncSessionLocal, engine
+from securecodecoach.llm.gateway import build_gateway
 from securecodecoach.logging_setup import request_id_var, setup_logging
 
 logger = logging.getLogger("securecodecoach")
@@ -28,6 +32,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     setup_logging(settings.log_level)
 
+    usage_repo = LlmCallRepository(AsyncSessionLocal)
     app = FastAPI(
         title="SecureCodeCoach",
         description="AI-powered secure coding mentor",
@@ -35,6 +40,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = settings
+    app.state.usage_repo = usage_repo
+    app.state.gateway = build_gateway(settings, recorder=usage_repo.record)
+    app.state.system_prompt = load_prompt(settings.prompts_dir, PROMPT_VERSION)
 
     @app.middleware("http")
     async def add_request_id(request: Request, call_next):
@@ -79,6 +87,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(documents_router)
+    app.include_router(chat_router, prefix="/v1")
 
     @app.get("/")
     async def home():
