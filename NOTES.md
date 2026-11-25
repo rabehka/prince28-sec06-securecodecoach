@@ -63,3 +63,7 @@
 ### One thing that went wrong today, and how I fixed it
 
 - Gemini's free-tier rate limit / transient errors caused primary calls to fail during testing, which automatically triggered the circuit breaker and routed traffic seamlessly to Groq (`fallback=YES`). Also caught an accidental terminal paste into `db/llm_calls.py` and missing `prompts/chat_system_v1.md` during pytest collection; fixed both cleanly and verified all 74 unit tests pass.
+
+### Stretch: Latency Percentiles (`llm_calls` where `status = ok`)
+- **p50:** 2280 ms (2.28 s)
+- **p95:** 31026.6 ms (31.03 s — skewed by the initial Render cold-start call)
