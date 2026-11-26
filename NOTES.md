@@ -80,7 +80,7 @@
 | classify_v4 | 20/20 | 100% | 0 | 287 |
 
 <!-- prompts:end -->
-## Day 9 — LLM Gateway, Router Prompt Evaluation & Metadata Extraction
+### D09 · Prompts and structured output
 
 ### 1. Router Prompt Iteration (`classify_v1` → `classify_v4`)
 - **v1 (65% accuracy):** Misclassified ambiguous implementation questions and mixed-language queries due to loose category boundaries.
