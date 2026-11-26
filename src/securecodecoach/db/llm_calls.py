@@ -1,5 +1,6 @@
 """Write LLM call logs and aggregate daily usage from llm_calls."""
 
+from collections.abc import Awaitable, Callable
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import case, func, select
@@ -49,3 +50,10 @@ class LlmCallRepository:
             }
             for r in rows
         ]
+
+
+def make_recorder(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> Callable[[dict], Awaitable[None]]:
+    repo = LlmCallRepository(session_factory)
+    return repo.record

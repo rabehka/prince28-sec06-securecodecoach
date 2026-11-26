@@ -67,3 +67,29 @@
 ### Stretch: Latency Percentiles (`llm_calls` where `status = ok`)
 - **p50:** 2280 ms (2.28 s)
 - **p95:** 31026.6 ms (31.03 s — skewed by the initial Render cold-start call)
+
+## D09 · Prompt versions compared
+
+<!-- prompts:start -->
+
+| Prompt version | Correct | Accuracy | Invalid replies | Avg tokens in |
+|---|---|---|---|---|
+| classify_v1 | 13/20 | 65% | 0 | 113 |
+| classify_v2 | 20/20 | 100% | 0 | 285 |
+| classify_v3 | 20/20 | 100% | 0 | 411 |
+| classify_v4 | 20/20 | 100% | 0 | 287 |
+
+<!-- prompts:end -->
+## Day 9 — LLM Gateway, Router Prompt Evaluation & Metadata Extraction
+
+### 1. Router Prompt Iteration (`classify_v1` → `classify_v4`)
+- **v1 (65% accuracy):** Misclassified ambiguous implementation questions and mixed-language queries due to loose category boundaries.
+- **v2–v4 (100% accuracy):** Added explicit decision rules for `howto` vs `explain` vs `review`, strict JSON-only output constraints, and clear fallback handling. Selected `classify_v4` for production routing.
+
+### 2. Metadata Extraction & Validation Loop (`extract_v1` → `extract_v2`)
+- **Contract (`DocMeta`):** Enforced strict Pydantic schema validation (`doc_kind`, `year`, `language`, `topics`, `summary`, `item_id`, `asvs_level`, `asvs_version`) with a single repair retry on malformed JSON or type mismatches.
+- **Observations (`extract_v1` vs `extract_v2`):**
+  - `extract_v1` defaulted short vulnerability definitions (e.g., *SQL Injection*, *Cross-Site Scripting*) to `"other"` instead of `"reference"`, and occasionally returned non-JSON prose or scalar strings for list fields (`asvs_version`).
+  - `extract_v2` tightened `doc_kind` mapping rules (`guideline` for Cheat Sheets, `rule` for ASVS requirements, `tutorial` for WSTG tests, `reference` for vulnerability definitions) and eliminated `"other"` false positives across the 169-document corpus (`failed=0`).
+  - Automatic repair handled edge cases such as non-JSON responses (*Authorization Regression Testing Cheat Sheet*) and scalar-to-list coercion (*Transport Layer Protection Cheat Sheet*).
+- **Operational Resilience:** Gateway circuit-breaker and 60s rate-limit backoff allowed uninterrupted resumption across Gemini (`gemini-3.1-flash-lite`) and Groq (`openai/gpt-oss-20b`) fallbacks without duplicate API calls or lost progress.
