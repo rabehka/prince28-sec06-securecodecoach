@@ -56,3 +56,8 @@ def database_url():
     get_settings.cache_clear()
     patch.undo()
     asyncio.run(_admin(f'DROP DATABASE IF EXISTS "{name}" WITH (FORCE)'))
+
+
+@pytest.fixture
+def db_session_factory(database_url):
+    return db_session.AsyncSessionLocal
