@@ -94,3 +94,10 @@
   - Automatic repair handled edge cases such as non-JSON responses (*Authorization Regression Testing Cheat Sheet*) and scalar-to-list coercion (*Transport Layer Protection Cheat Sheet*).
 - **Operational Resilience:** Gateway circuit-breaker and 60s rate-limit backoff allowed uninterrupted resumption across Gemini (`gemini-3.1-flash-lite`) and Groq (`openai/gpt-oss-20b`) fallbacks without duplicate API calls or lost progress.
 Extraction run: 135 ok, 4 repaired, 0 failed of 139 parsed
+## Day 10 — Ingestion Queue, Background Workers, and Crash Recovery
+
+- **First run (10 docs):** Job `a0c122fbb4ab482a92ed7e26f6ca24dc` — `10` queued, finished in `132s` (`13.2s`/doc), `10` done, `0` skipped, `0` failed, `79` pages (`INGEST_RPM=12.0`, `INGEST_CONCURRENCY=2`).
+- **Second run (20 docs):** Job `b4c9d14088614ff99aab596cd64e7005` — `20` queued, finished in `185s`, `20` done, `0` skipped, `0` failed, `136` pages.
+- **Kill test & crash recovery:** Job `0e624a3d67d24db0b37c457cb1ff5555` (`10` queued) — killed worker hard at `queued=5 running=1 done=4` (`155s`). Restarted worker (`uv run poe worker`); queued items resumed immediately and the interrupted item recovered after visibility lock expiry. All `10` items finished (`58` pages) with `most_tries = 2` and `documents == different` (zero duplicate rows).
+- **Dead-letter & retry:** `/v1/ingest/dead-letter` returned `[]`; `scripts/ingest.py --retry-failed` confirmed all documents ingested.
+- **Deployment:** Configured Upstash Redis (`REDIS_URL`), `ADMIN_TOKEN`, and `WORKER_IN_API=true` on Render.

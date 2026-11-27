@@ -1,8 +1,9 @@
 """Main FastAPI application."""
 
+import asyncio
 import logging
 import uuid
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -13,6 +14,7 @@ from securecodecoach.api.routes.chat import PROMPT_VERSION, load_prompt
 from securecodecoach.api.routes.chat import router as chat_router
 from securecodecoach.api.routes.documents import router as documents_router
 from securecodecoach.api.routes.health import router as health_router
+from securecodecoach.api.routes.ingest import router as ingest_router
 from securecodecoach.config import Settings, get_settings
 from securecodecoach.db.llm_calls import LlmCallRepository
 from securecodecoach.db.session import AsyncSessionLocal, engine
@@ -22,24 +24,37 @@ from securecodecoach.logging_setup import request_id_var, setup_logging
 logger = logging.getLogger("securecodecoach")
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-    await engine.dispose()
-
-
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     setup_logging(settings.log_level)
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        logger.info("starting", extra={"status": settings.app_env})
+        worker = None
+        if settings.worker_in_api:
+            from securecodecoach.workers.main import run_embedded
+
+            worker = asyncio.create_task(run_embedded(settings))
+        yield
+        if worker:
+            worker.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker
+        if getattr(app.state, "queue", None):
+            await app.state.queue.close()
+        await engine.dispose()
 
     usage_repo = LlmCallRepository(AsyncSessionLocal)
     app = FastAPI(
         title="SecureCodeCoach",
         description="AI-powered secure coding mentor",
-        version="0.1.0",
+        version="0.2.0",
         lifespan=lifespan,
     )
     app.state.settings = settings
+    app.state.engine = engine
+    app.state.sessionmaker = AsyncSessionLocal
     app.state.usage_repo = usage_repo
     app.state.gateway = build_gateway(settings, recorder=usage_repo.record)
     app.state.system_prompt = load_prompt(settings.prompts_dir, PROMPT_VERSION)
@@ -58,7 +73,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-        titles = {404: "Not Found", 400: "Bad Request", 503: "Service Unavailable"}
+        titles = {
+            401: "Unauthorized",
+            403: "Forbidden",
+            404: "Not Found",
+            400: "Bad Request",
+            503: "Service Unavailable",
+        }
         return JSONResponse(
             status_code=exc.status_code,
             media_type="application/problem+json",
@@ -88,6 +109,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(health_router)
     app.include_router(documents_router)
     app.include_router(chat_router, prefix="/v1")
+    app.include_router(ingest_router, prefix="/v1")
 
     @app.get("/")
     async def home():
