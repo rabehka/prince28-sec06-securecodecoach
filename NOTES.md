@@ -101,3 +101,4 @@ Extraction run: 135 ok, 4 repaired, 0 failed of 139 parsed
 - **Kill test & crash recovery:** Job `0e624a3d67d24db0b37c457cb1ff5555` (`10` queued) — killed worker hard at `queued=5 running=1 done=4` (`155s`). Restarted worker (`uv run poe worker`); queued items resumed immediately and the interrupted item recovered after visibility lock expiry. All `10` items finished (`58` pages) with `most_tries = 2` and `documents == different` (zero duplicate rows).
 - **Dead-letter & retry:** `/v1/ingest/dead-letter` returned `[]`; `scripts/ingest.py --retry-failed` confirmed all documents ingested.
 - **Deployment:** Configured Upstash Redis (`REDIS_URL`), `ADMIN_TOKEN`, and `WORKER_IN_API=true` on Render.
+- **Live Render run (`https://securecodecoach.onrender.com`):** Job `2e2f8c8ad7c74bbcb3f6288c0d4f33ff` completed `5 done, 0 failed` (`43` pages) in `39s`; second batch `0647495ab21e4c828e556234454ab15d` completed `3 done, 2 skipped, 0 failed` (`33` pages) in `59s`.
