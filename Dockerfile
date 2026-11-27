@@ -32,6 +32,7 @@ COPY --chown=appuser:appgroup alembic.ini ./
 COPY --chown=appuser:appgroup migrations ./migrations
 COPY --chown=app:app prompts ./prompts
 COPY --chown=appuser:appgroup scripts ./scripts
+COPY --chown=appuser:appgroup data ./data
 
 USER appuser
 
