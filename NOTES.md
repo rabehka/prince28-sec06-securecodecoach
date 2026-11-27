@@ -80,7 +80,7 @@
 | classify_v4 | 20/20 | 100% | 0 | 287 |
 
 <!-- prompts:end -->
-## Day 9 — LLM Gateway, Router Prompt Evaluation & Metadata Extraction
+### D09 · Prompts and structured output
 
 ### 1. Router Prompt Iteration (`classify_v1` → `classify_v4`)
 - **v1 (65% accuracy):** Misclassified ambiguous implementation questions and mixed-language queries due to loose category boundaries.
@@ -93,3 +93,4 @@
   - `extract_v2` tightened `doc_kind` mapping rules (`guideline` for Cheat Sheets, `rule` for ASVS requirements, `tutorial` for WSTG tests, `reference` for vulnerability definitions) and eliminated `"other"` false positives across the 169-document corpus (`failed=0`).
   - Automatic repair handled edge cases such as non-JSON responses (*Authorization Regression Testing Cheat Sheet*) and scalar-to-list coercion (*Transport Layer Protection Cheat Sheet*).
 - **Operational Resilience:** Gateway circuit-breaker and 60s rate-limit backoff allowed uninterrupted resumption across Gemini (`gemini-3.1-flash-lite`) and Groq (`openai/gpt-oss-20b`) fallbacks without duplicate API calls or lost progress.
+Extraction run: 135 ok, 4 repaired, 0 failed of 139 parsed
